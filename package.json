@@ -1,6 +1,6 @@
 {
   "name": "nazeef-puzzle-galaxy",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "private": true,
   "scripts": {
     "build": "mkdir -p www && cp index.html manifest.webmanifest www/",
