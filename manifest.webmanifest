@@ -1,0 +1,10 @@
+{
+  "name": "Nazeef Puzzle Galaxy",
+  "short_name": "Puzzle Galaxy",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d27",
+  "theme_color": "#11102d",
+  "orientation": "portrait",
+  "icons": []
+}
