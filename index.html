@@ -92,7 +92,7 @@ function makeAstronaut(){
  root.add(rig);return root;
 }
 function addWorldDecor(){
- const edge=N/2+.8;for(let i=0;i<3;i++){let plat=addBox(board,(i-1)*1.55,.35,-edge-.7,.95,.16,.72,material(["#5deaff","#ff8bd2","#ffd66e"][i],.3,.45));platforms.push(plat)}
+ const platformEdge=N/2+.8;for(let i=0;i<3;i++){let plat=addBox(board,(i-1)*1.55,.35,-platformEdge-.7,.95,.16,.72,material(["#5deaff","#ff8bd2","#ffd66e"][i],.3,.45));platforms.push(plat)}
 
  const palette=['#65eaff','#ff86d0','#ffd66e','#a9ffcf','#b6a1ff'];let seed=(w+3)*7919+l*104729;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
  const edge=N/2+.35;
