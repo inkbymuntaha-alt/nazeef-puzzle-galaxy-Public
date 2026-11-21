@@ -11,6 +11,7 @@ Open the GitHub Pages site: https://inkbymuntaha-alt.github.io/nazeef-puzzle-gal
 - 8 themed worlds and 200 levels.
 - Version 7.0: redesigned multi-part Galaxy Guardian with animated horns, glowing eyes and a rotating energy aura.
 - Version 7.1: 576 rotating celebration phrase combinations, male-voice preference, five lower-pitched speaking styles, and graceful fallback when device speech is unavailable.
+- Version 8.0: special boss/world-finale spoken lines, layered synthesized crowd-cheer and victory fanfare, and expanded milestone celebrations.
 - Collect three crystals, find the golden key, rescue your space buddy and reach the portal.
 - Level 25 in each world includes a Galaxy Guardian.
 - Moving alien patrols, energy traps, jetpack jumps, suit colours and level celebrations.
@@ -25,4 +26,4 @@ Open the GitHub Pages site: https://inkbymuntaha-alt.github.io/nazeef-puzzle-gal
 
 ## Notes
 
-Three.js is loaded from jsDelivr, and speech uses the voices available in the player's browser or device. Voice quality and availability depend on that device.
+Three.js is loaded from jsDelivr. Speech still uses browser/device-native speech synthesis; Version 8.0 adds milestone-specific lines and synthesized celebration effects, not studio-recorded or neural AI voice clips. Voice quality and availability depend on the device.
