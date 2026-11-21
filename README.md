@@ -9,6 +9,7 @@ Open the GitHub Pages site: https://inkbymuntaha-alt.github.io/nazeef-puzzle-gal
 ## Game
 
 - 8 themed worlds and 200 levels.
+- Version 7.0: redesigned multi-part Galaxy Guardian with animated horns, glowing eyes and a rotating energy aura.
 - Collect three crystals, find the golden key, rescue your space buddy and reach the portal.
 - Level 25 in each world includes a Galaxy Guardian.
 - Moving alien patrols, energy traps, jetpack jumps, suit colours and level celebrations.
