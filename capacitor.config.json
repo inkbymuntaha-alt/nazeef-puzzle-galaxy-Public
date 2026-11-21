@@ -1,0 +1,8 @@
+{
+  "appId": "com.nazeef.puzzlegalaxy",
+  "appName": "Nazeef Puzzle Galaxy",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
