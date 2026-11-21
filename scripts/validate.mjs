@@ -20,7 +20,7 @@ const ids = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m => m[1]))
 const references = new Set([...html.matchAll(/\$\(\s*["']([^"']+)["']\s*\)/g)].map(m => m[1]));
 const missing = [...references].filter(id => !ids.has(id));
 assert.deepEqual(missing, [], `Missing page elements: ${missing.join(', ')}`);
-assert.ok(html.includes('Nazif Puzzle Galaxy 7.1'), 'Page title should identify the current game.');
+assert.ok(html.includes('Nazif Puzzle Galaxy 8.0'), 'Page title should identify the current game.');
 assert.ok(html.includes('new THREE.TorusGeometry(.55,.045,10,48)'), 'Guardian must include its animated energy aura.');
 assert.ok(html.includes('bossMesh.children[5].rotation.z=t*1.35'), 'Guardian aura animation must target the aura mesh.');
 assert.ok(html.includes('celebrationOpeners.flatMap'), 'Celebrations must contain the generated 576 phrase variations.');
@@ -35,5 +35,9 @@ assert.ok(html.includes('function start(world,lev){w=world;l=lev;clearBoard();ge
 assert.ok(html.includes('removeVisual(keyMesh);keyMesh=null'), 'The golden key must disappear when collected.');
 assert.ok(html.includes('removeVisual(buddyMesh);buddyMesh=null'), 'The rescued buddy must disappear when collected.');
 assert.ok(html.includes('jumping<=0&&Math.hypot'), 'A jetpack jump must avoid alien contact.');
-assert.ok(html.includes('ULTRA REAL ADVENTURE · 7.1'), 'Version label must match the release.');
+assert.ok(html.includes('ULTRA REAL ADVENTURE · 8.0'), 'Version label must match the release.');
 console.log(`Game validation passed: module syntax, ${ids.size} unique page IDs, ${references.size} DOM references, core controls and safety checks.`);
+
+assert.ok(html.includes('function crowdCheer()'), 'Victory must include the layered crowd-cheer effect.');
+assert.ok(html.includes('const milestoneLines=l===25?'), 'Boss and final-world wins must use dedicated spoken lines.');
+assert.ok(html.includes('crowdCheer();popSound(true)'), 'Level victory must trigger the expanded celebration sound design.');
