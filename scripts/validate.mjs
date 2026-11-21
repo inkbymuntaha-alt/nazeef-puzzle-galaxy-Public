@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const moduleMatch = html.match(/<script\\s+type=[\"']module[\"']\\s*>([\\s\\S]*?)<\\/script>/i);
+const moduleMatch = html.match(/<script\s+type=["']module["']\s*>([\s\S]*?)<\/script>/i);
 assert.ok(moduleMatch, 'The page must contain its Three.js module script.');
 const temp = join(tmpdir(), `nazif-game-${process.pid}.mjs`);
 try {
@@ -16,8 +16,8 @@ try {
   try { unlinkSync(temp); } catch {}
 }
 
-const ids = new Set([...html.matchAll(/\\bid=[\"']([^\"']+)[\"']/g)].map(m => m[1]));
-const references = new Set([...html.matchAll(/\\$\\(\\s*[\"']([^\"']+)[\"']\\s*\\)/g)].map(m => m[1]));
+const ids = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m => m[1]));
+const references = new Set([...html.matchAll(/\$\(\s*["']([^"']+)["']\s*\)/g)].map(m => m[1]));
 const missing = [...references].filter(id => !ids.has(id));
 assert.deepEqual(missing, [], `Missing page elements: ${missing.join(', ')}`);
 assert.ok(html.includes('Nazif Puzzle Galaxy 6.0'), 'Page title should identify the current game.');
