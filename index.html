@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080b25"><meta name="description" content="Nazif Puzzle Galaxy 2.0 — a 3D cosmic puzzle adventure.">
-<title>Nazif Puzzle Galaxy 3.0</title>
+<title>Nazif Puzzle Galaxy 4.0</title>
 <style>
 :root{color-scheme:dark;--cyan:#7af3ff;--gold:#ffdc70;--pink:#ff86d0;--panel:#111b43}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,"Trebuchet MS",sans-serif;color:#f7f8ff;background:#070a20}
@@ -41,7 +41,7 @@ h2{font-size:16px;margin:0 0 7px}.sub{font-size:12px;line-height:1.45;color:#c5d
 <main id="app">
 <section id="stage"><canvas id="view"></canvas><div class="fx" id="fx"></div><div id="joystick" aria-label="Movement joystick"><div id="stick-knob"></div></div><button id="jump" aria-label="Jump">⬆</button><div id="toast"></div><div id="win"><div class="winbox"><div class="big">🏆✨</div><h2>GALAXY MASTER!</h2><p id="winmsg">You solved the cosmic puzzle!</p><button class="btn primary" id="next">NEXT ADVENTURE 🚀</button></div></div></section>
 <aside id="side">
-<section class="panel"><div class="topline"><div class="brand"><div class="logo">🚀</div><div><h1>NAZIF <span>PUZZLE GALAXY</span></h1><div class="tag">3D COSMIC ADVENTURE · 3.0</div></div></div><button class="btn" id="sound">🔊</button></div><div class="stats"><div class="stat">⭐ STARS<b id="stars">0</b></div><div class="stat">🏆 LEVELS<b id="done">0/200</b></div><div class="stat">💎 CRYSTALS<b id="gems">0</b></div></div></section>
+<section class="panel"><div class="topline"><div class="brand"><div class="logo">🚀</div><div><h1>NAZIF <span>PUZZLE GALAXY</span></h1><div class="tag">LIVING 3D ADVENTURE · 4.0</div></div></div><button class="btn" id="sound">🔊</button></div><div class="stats"><div class="stat">⭐ STARS<b id="stars">0</b></div><div class="stat">🏆 LEVELS<b id="done">0/200</b></div><div class="stat">💎 CRYSTALS<b id="gems">0</b></div></div></section>
 <section class="panel"><h2 id="worldname">🌙 Moon Meadow</h2><p class="sub" id="worlddesc">Explore a glowing moon garden. Collect the crystals and reach the portal.</p><div class="worldrow" id="worlds"></div></section>
 <section class="panel"><div class="topline"><h2 id="levelname">Level 1</h2><span class="pill" id="progress">0 / 3 ⭐</span></div><div id="goal"><div class="goalicon">🧩</div><div class="goaltext"><b>Mission:</b> Collect all 3 star crystals, then reach the portal. Use the on-screen joystick to explore freely.</div></div><div id="levels"></div></section>
 <section class="panel"><div class="actions"><button class="btn" id="hint">💡 Hint</button><button class="btn" id="restart">↻ Restart</button><button class="btn" id="map">🌌 Level map</button></div><div style="height:9px"></div><div class="dpad"><button class="up" data-dir="up">↑</button><button class="left" data-dir="left">←</button><button class="down" data-dir="down">↓</button><button class="right" data-dir="right">→</button></div></section>
@@ -53,7 +53,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 const $=id=>document.getElementById(id);
 const worlds=[['Moon Meadow','🌙','A moonlit garden of gentle twists.','#8b9cff'],['Candy Comet','🍭','Sweet cosmic paths and sugary surprises.','#ff8acb'],['Crystal Caves','💎','Shimmering caverns packed with gems.','#69eaff'],['Dino Nebula','🦖','Ancient stars light up the jungle planet.','#8bf0a5'],['Rainbow Rings','🌈','Colourful bridges weave between the stars.','#ffc86d'],['Supernova City','🌟','A dazzling city among the supernovas.','#ff9b7a'],['Frostfire World','❄️','Icy corridors sparkle with warm starlight.','#9edcff'],['Aurora Kingdom','👑','The final galaxy challenge awaits!','#d9a4ff']];
 let save={unlocked:1,completed:{},stars:0,gems:0};try{save=Object.assign(save,JSON.parse(localStorage.getItem('npg2save')||'{}'))}catch(e){}
-let w=0,l=1,N=9,grid=[],path=[],starCells=[],got=[],player=0,goal=0,won=false,sound=true,scene,camera,renderer,board=new THREE.Group(),hero,heroGlow,objects=[],sparkles=[],clock=new THREE.Clock(),hintCell=-1;
+let w=0,l=1,N=9,grid=[],path=[],starCells=[],got=[],player=0,goal=0,won=false,sound=true,scene,camera,renderer,board=new THREE.Group(),hero,heroRig,astronautParts={},heroGlow,objects=[],sparkles=[],clock=new THREE.Clock(),hintCell=-1;
 let moveVector={x:0,z:0},jumping=0,moveLock=0,starMeshes={};
 const mats={};
 function material(c,rough=.75,metal=0){let k=c+'-'+rough+'-'+metal;if(!mats[k])mats[k]=new THREE.MeshStandardMaterial({color:c,roughness:rough,metalness:metal});return mats[k]}
@@ -63,12 +63,59 @@ function clearBoard(){while(board.children.length){let o=board.children.pop();if
 function cellPos(i){return {x:(i%N)-(N-1)/2,z:Math.floor(i/N)-(N-1)/2}}
 function addBox(parent,x,y,z,sx,sy,sz,mat,round=false){let g=new THREE.BoxGeometry(sx,sy,sz);let m=new THREE.Mesh(g,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
 function addOrb(x,y,z,r,color,glow=0){let m=new THREE.Mesh(new THREE.SphereGeometry(r,20,16),new THREE.MeshStandardMaterial({color,roughness:.25,metalness:.3,emissive:color,emissiveIntensity:glow}));m.position.set(x,y,z);m.castShadow=true;board.add(m);return m}
-function buildWorld(){clearBoard();let color=worlds[w][3];scene.background=new THREE.Color(w===1?'#28133f':w===2?'#092c48':w===3?'#102d2b':'#0b1438');scene.fog.color.copy(scene.background);let floor=addBox(board,0,-.42,0,N+.8,.55,N+.8,material('#202d60'));floor.receiveShadow=true;
-for(let r=0;r<N;r++)for(let c=0;c<N;c++){let i=r*N+c,p=cellPos(i);if(grid[i]){let tile=addBox(board,p.x,-.04,p.z,.94,.22,.94,material(i===goal?'#176e75':got.includes(i)?'#315b7b':'#38548f',.65,.12));tile.userData.index=i;objects.push(tile);if(i===goal){addOrb(p.x,.45,p.z,.25,'#68ffd2',1.5);let ring=new THREE.Mesh(new THREE.TorusGeometry(.42,.055,8,32),new THREE.MeshStandardMaterial({color:'#8affd6',emissive:'#39ffc1',emissiveIntensity:1.5}));ring.rotation.x=Math.PI/2;ring.position.set(p.x,.24,p.z);board.add(ring);sparkles.push(ring)}}else{let wall=addBox(board,p.x,.18,p.z,.96,.62,.96,material('#121b3e'));wall.position.y=.03;}}
-starCells.forEach(i=>{if(got.includes(i))return;let p=cellPos(i);let star=new THREE.Mesh(new THREE.OctahedronGeometry(.29,0),new THREE.MeshStandardMaterial({color:'#ffe27a',metalness:.45,roughness:.22,emissive:'#ffad24',emissiveIntensity:1.1}));star.position.set(p.x,.55,p.z);star.castShadow=true;board.add(star);starMeshes[i]=star;sparkles.push(star)});
-let p=cellPos(player);let group=new THREE.Group();let body=new THREE.Mesh(new THREE.SphereGeometry(.31,24,20),new THREE.MeshStandardMaterial({color:'#65efff',metalness:.2,roughness:.22,emissive:'#168bb5',emissiveIntensity:.6}));body.scale.set(1,1.15,.85);body.castShadow=true;group.add(body);let glass=new THREE.Mesh(new THREE.SphereGeometry(.19,20,16),material('#18305d',.12,.45));glass.position.set(0,.04,.23);group.add(glass);let eyeMat=material('#fff5cf',.18);[-.085,.085].forEach(x=>{let eye=new THREE.Mesh(new THREE.SphereGeometry(.035,12,10),eyeMat);eye.position.set(x,.05,.39);group.add(eye)});let antenna=addBox(group,0,.39,0,.045,.24,.045,material('#ffe27a'));let ball=new THREE.Mesh(new THREE.SphereGeometry(.09,12,10),material('#ff84ca',.2,.2));ball.position.y=.54;group.add(ball);group.position.set(p.x,.47,p.z);board.add(group);hero=group;
-for(let i=0;i<25;i++){let a=addOrb((Math.random()-.5)*N,2+Math.random()*5,(Math.random()-.5)*N,.025,'#a9eaff',.7);sparkles.push(a)}
-let span=N*.72,zoom=camera.aspect<.9?1.75:1;camera.position.set(span*zoom,span*1.23*zoom,span*1.28*zoom);camera.lookAt(0,0,0);camera.updateProjectionMatrix()}
+function makeAstronaut(){
+ const root=new THREE.Group(),rig=new THREE.Group();root.add(rig);heroRig=rig;astronautParts={};
+ const suit=material('#f3f7ff',.34,.12),suitShade=material('#a9c7e7',.42,.18),dark=material('#172b4e',.2,.35),gold=material('#ffd66e',.28,.48),glow=material('#53eaff',.22,.32),boot=material('#263d68',.3,.3);
+ const capsule=(parent,r,len,mat,x,y,z)=>{let m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,4,10),mat);m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m};
+ const sphere=(parent,r,mat,x,y,z,sx=1,sy=1,sz=1)=>{let m=new THREE.Mesh(new THREE.SphereGeometry(r,20,16),mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;parent.add(m);return m};
+ capsule(rig,.22,.42,suit,0,.78,0);
+ let chest=addBox(rig,0,.82,.205,.25,.22,.045,dark);chest.material=dark;
+ addBox(rig,0,.83,.235,.13,.12,.018,glow);
+ [-.07,.07].forEach((x,i)=>sphere(rig,.025,i?gold:glow,x,.84,.252));
+ addBox(rig,0,.57,.02,.31,.12,.25,suitShade);
+ let pack=addBox(rig,0,.83,-.22,.34,.43,.2,dark);
+ addBox(rig,-.1,.84,-.34,.07,.28,.05,glow);addBox(rig,.1,.84,-.34,.07,.28,.05,gold);
+ sphere(rig,.29,suit,0,1.27,.015,1,1,.96);
+ let visor=new THREE.Mesh(new THREE.SphereGeometry(.235,28,22),new THREE.MeshPhysicalMaterial({color:'#17385e',metalness:.62,roughness:.12,clearcoat:1,clearcoatRoughness:.05,emissive:'#123b65',emissiveIntensity:.35}));
+ visor.position.set(0,1.28,.205);visor.scale.set(.83,.64,.48);visor.castShadow=true;rig.add(visor);
+ let visorShine=addBox(rig,-.09,1.36,.305,.055,.012,.012,material('#c7f8ff',.12,.2));visorShine.rotation.z=-.35;
+ let rim=new THREE.Mesh(new THREE.TorusGeometry(.278,.035,10,32),gold);rim.rotation.x=Math.PI/2;rim.position.set(0,1.27,0);rig.add(rim);
+ addBox(rig,0,1.58,-.015,.045,.12,.045,gold);sphere(rig,.055,glow,0,1.65,-.015);
+ for(const side of [-1,1]){
+  let shoulder=sphere(rig,.14,suit,side*.29,.99,0,1,.9,1);
+  let arm=new THREE.Group();arm.position.set(side*.3,.96,0);rig.add(arm);capsule(arm,.095,.32,suit,0,-.17,0);sphere(arm,.105,boot,0,-.37,.015);sphere(arm,.07,gold,0,-.39,.035);
+  let leg=new THREE.Group();leg.position.set(side*.125,.48,0);rig.add(leg);capsule(leg,.105,.31,suit,0,-.16,0);let foot=addBox(leg,0,-.37,.055,.22,.14,.32,boot);foot.rotation.x=-.08;addBox(leg,0,-.31,.19,.16,.045,.025,gold);
+  astronautParts[side<0?'leftArm':'rightArm']=arm;astronautParts[side<0?'leftLeg':'rightLeg']=leg;
+  addBox(rig,side*.31,.98,.015,.12,.08,.16,suitShade);
+ }
+ root.add(rig);return root;
+}
+function addWorldDecor(){
+ const palette=['#65eaff','#ff86d0','#ffd66e','#a9ffcf','#b6a1ff'];let seed=(w+3)*7919+l*104729;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ const edge=N/2+.35;
+ for(let i=0;i<14;i++){
+  let side=i%4,along=(rand()-.5)*(N-1),x=side===0?-edge:side===1?edge:along,z=side===2?-edge:side===3?edge:along;
+  let h=.35+rand()*.85,col=palette[(i+w)%palette.length];
+  let rock=addOrb(x,.12,z,.16+rand()*.12,'#344a78',.15);rock.scale.set(1.3,.65,1);
+  let crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.16+rand()*.13,0),new THREE.MeshStandardMaterial({color:col,metalness:.35,roughness:.2,emissive:col,emissiveIntensity:.75}));
+  crystal.position.set(x,.28+h*.45,z);crystal.scale.set(.8,h*2,.8);crystal.rotation.z=(rand()-.5)*.35;crystal.castShadow=true;board.add(crystal);sparkles.push(crystal);
+ }
+ for(let i=0;i<4;i++){
+  let x=(i<2?-1:1)*edge,z=(i%2?1:-1)*edge;
+  let ring=new THREE.Mesh(new THREE.TorusGeometry(.48,.035,8,32),new THREE.MeshStandardMaterial({color:palette[(i+w)%palette.length],emissive:palette[(i+w)%palette.length],emissiveIntensity:.65,metalness:.4}));
+  ring.position.set(x,1.25,z);ring.rotation.x=Math.PI/2.6;board.add(ring);sparkles.push(ring);
+ }
+}
+function buildWorld(){clearBoard();let color=worlds[w][3];scene.background=new THREE.Color(w===1?'#28133f':w===2?'#092c48':w===3?'#102d2b':w===4?'#342052':w===5?'#351b2e':w===6?'#102d49':'#20163e');scene.fog.color.copy(scene.background);
+ let floor=addBox(board,0,-.42,0,N+.8,.55,N+.8,material('#202d60',.82,.18));floor.receiveShadow=true;
+ let rim=new THREE.Mesh(new THREE.TorusGeometry((N+.35)*.69,.075,8,80),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.45,metalness:.5,roughness:.3}));rim.rotation.x=Math.PI/2;rim.position.y=-.12;rim.scale.set(1,1,1);board.add(rim);
+ for(let r=0;r<N;r++)for(let c=0;c<N;c++){let i=r*N+c,p=cellPos(i);if(grid[i]){let tile=addBox(board,p.x,-.04,p.z,.94,.22,.94,material(i===goal?'#176e75':got.includes(i)?'#315b7b':'#38548f',.48,.22));tile.userData.index=i;objects.push(tile);let top=addBox(board,p.x,.075,p.z,.86,.035,.86,material(i===goal?'#36a9a0':got.includes(i)?'#467da0':'#4969a8',.38,.18));if(i===goal){addOrb(p.x,.45,p.z,.25,'#68ffd2',1.5);let ring=new THREE.Mesh(new THREE.TorusGeometry(.42,.055,8,32),new THREE.MeshStandardMaterial({color:'#8affd6',emissive:'#39ffc1',emissiveIntensity:1.5}));ring.rotation.x=Math.PI/2;ring.position.set(p.x,.24,p.z);board.add(ring);sparkles.push(ring)}}else{let wall=addBox(board,p.x,.18,p.z,.96,.62,.96,material('#121b3e',.55,.2));wall.position.y=.03;let cap=addBox(board,p.x,.35,p.z,.88,.07,.88,material('#263b70',.38,.3));}}
+ starCells.forEach(i=>{if(got.includes(i))return;let p=cellPos(i);let star=new THREE.Mesh(new THREE.OctahedronGeometry(.29,1),new THREE.MeshStandardMaterial({color:'#ffe27a',metalness:.45,roughness:.18,emissive:'#ffad24',emissiveIntensity:1.25}));star.position.set(p.x,.55,p.z);star.castShadow=true;board.add(star);starMeshes[i]=star;sparkles.push(star)});
+ addWorldDecor();let p=cellPos(player);hero=makeAstronaut();hero.position.set(p.x,.47,p.z);board.add(hero);
+ for(let i=0;i<22;i++){let a=addOrb((randFloat()- .5)*N,2+Math.random()*5,(randFloat()-.5)*N,.025,'#a9eaff',.7);sparkles.push(a)}
+ let span=N*.72,zoom=camera.aspect<.9?1.75:1;camera.position.set(span*zoom,span*1.23*zoom,span*1.28*zoom);camera.lookAt(0,0,0);camera.updateProjectionMatrix()}
+function randFloat(){return Math.random()}
+
 function generate(){N=l<25?7:l<70?9:l<130?11:13;grid=Array(N*N).fill(false);let seed=(w+7)*982451653+l*7919;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}let stack=[[1,1]];grid[N+1]=true;let ds=[[0,2],[0,-2],[2,0],[-2,0]];while(stack.length){let a=stack[stack.length-1],opts=ds.map(d=>[a[0]+d[0],a[1]+d[1],d]).filter(q=>q[0]>0&&q[1]>0&&q[0]<N-1&&q[1]<N-1&&!grid[q[0]*N+q[1]]);if(!opts.length){stack.pop();continue}let q=opts[Math.floor(rand()*opts.length)];grid[(a[0]+q[0])/2*N+(a[1]+q[1])/2]=true;grid[q[0]*N+q[1]]=true;stack.push([q[0],q[1]])}
 player=N+1;goal=(N-2)*N+(N-2);path=findPath(player,goal);starCells=[.2,.5,.8].map(t=>path[Math.max(1,Math.min(path.length-2,Math.floor((path.length-1)*t)))]);starCells=[...new Set(starCells)];for(let i=0;starCells.length<3&&i<path.length;i++)if(path[i]!==player&&path[i]!==goal&&!starCells.includes(path[i]))starCells.push(path[i]);got=[];won=false;hintCell=-1}
 function neigh(i){let r=Math.floor(i/N),c=i%N;return [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].filter(a=>a[0]>=0&&a[1]>=0&&a[0]<N&&a[1]<N).map(a=>a[0]*N+a[1])}
@@ -96,7 +143,7 @@ const celebrationLines=["Well done, Nazif! Kya baat hai!","Wow, Nazif! You did i
 function speakCelebration(){const idx=(Number(save.celebrationIndex)||0)%celebrationLines.length;const line=celebrationLines[idx];save.celebrationIndex=idx+1;saveNow();$('winmsg').textContent=line;if(!sound||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const speak=()=>{const voices=speechSynthesis.getVoices();const hindi=/[\\u0900-\\u097F]/.test(line);const preferred=hindi?['hi-IN','hi']:['en-IN','en-GB','en-US','en'];let chosen=null;for(const lang of preferred){chosen=voices.find(v=>v.lang.toLowerCase().startsWith(lang.toLowerCase())&&(/google|natural|neural/i.test(v.name)))||voices.find(v=>v.lang.toLowerCase().startsWith(lang.toLowerCase()));if(chosen)break;}const u=new SpeechSynthesisUtterance(line);if(chosen)u.voice=chosen;u.lang=chosen?chosen.lang:(hindi?'hi-IN':'en-IN');u.rate=.91;u.pitch=1.12;u.volume=1;speechSynthesis.speak(u)};if(speechSynthesis.getVoices().length)speak();else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;speak()};setTimeout(()=>{if(speechSynthesis.speaking||speechSynthesis.pending)return;speak()},700)}}catch(e){}}
 function win(){won=true;let k=w*25+l;if(!save.completed[k]){save.completed[k]=true;save.stars+=3;save.unlocked=Math.max(save.unlocked,Math.min(200,k+1));saveNow()}ui();speakCelebration();celebrationBurst(true);setTimeout(()=>celebrationBurst(true),420);popSound(true);$('next').textContent=(l===25&&w===7)?'GALAXY COMPLETE 🏆':'NEXT ADVENTURE 🚀';$('win').classList.add('show');for(let i=0;i<6;i++)setTimeout(()=>beep(620+i*150,.2),i*115)}
 function nextLevel(){if(l<25)start(w,l+1);else if(w<7)start(w+1,1);else{toast('You are the Galaxy Champion! 🏆');$('win').classList.remove('show')}}
-function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;drive(dt);if(hero){if(jumping>0){jumping=Math.max(0,jumping-dt);hero.position.y=.47+Math.sin((.48-jumping)/.48*Math.PI)*.75}else hero.position.y=.47+Math.sin(t*3)*.035;let zoom=camera.aspect<.9?1.75:1,span=N*.72;let target=new THREE.Vector3(hero.position.x+span*zoom,hero.position.y+span*1.23*zoom,hero.position.z+span*1.28*zoom);camera.position.lerp(target,Math.min(1,dt*2.5));camera.lookAt(hero.position.x,0,hero.position.z)}sparkles.forEach((o,i)=>{if(o.geometry&&o.geometry.type==='OctahedronGeometry'){o.rotation.y=t*1.6;o.position.y=.55+Math.sin(t*2+i)*.08}else if(o.geometry&&o.geometry.type==='TorusGeometry')o.rotation.z=t*.6});renderer.render(scene,camera)}
+function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;drive(dt);if(hero){let moving=Math.hypot(moveVector.x,moveVector.z)>.12;if(jumping>0){jumping=Math.max(0,jumping-dt);hero.position.y=.47+Math.sin((.48-jumping)/.48*Math.PI)*.75}else hero.position.y=.47+Math.sin(t*(moving?10:2.6))*(moving?.045:.018);if(heroRig){let swing=moving?Math.sin(t*10)*.48:Math.sin(t*1.8)*.035;astronautParts.leftLeg.rotation.x=swing;astronautParts.rightLeg.rotation.x=-swing;astronautParts.leftArm.rotation.x=-swing*.72-.08;astronautParts.rightArm.rotation.x=swing*.72-.08;heroRig.rotation.z=moving?Math.sin(t*5)*.035:Math.sin(t*1.5)*.012;}let zoom=camera.aspect<.9?1.75:1,span=N*.72;let target=new THREE.Vector3(hero.position.x+span*zoom,hero.position.y+span*1.23*zoom,hero.position.z+span*1.28*zoom);camera.position.lerp(target,Math.min(1,dt*2.5));camera.lookAt(hero.position.x,0,hero.position.z)}sparkles.forEach((o,i)=>{if(o.geometry&&o.geometry.type==='OctahedronGeometry'){o.rotation.y=t*1.6;o.position.y=.55+Math.sin(t*2+i)*.08}else if(o.geometry&&o.geometry.type==='TorusGeometry')o.rotation.z=t*.6});renderer.render(scene,camera)}
 $('worlds').addEventListener('click',e=>{let b=e.target.closest('[data-w]');if(b){let nw=+b.dataset.w;if(nw*25+1>save.unlocked){toast('Complete the previous world to unlock this one! 🔒');return}start(nw,1)}});
 $('levels').addEventListener('click',e=>{let b=e.target.closest('[data-l]');if(b&&!b.disabled)start(w,+b.dataset.l)});
 $('view').addEventListener('pointerdown',e=>{let r=renderer.domElement.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*2-1,y=-(e.clientY-r.top)/r.height*2+1,ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2(x,y),camera);let hits=ray.intersectObjects(objects);if(hits.length){let n=hits[0].object.userData.index;if(neigh(player).includes(n))move(n)}});
