@@ -156,7 +156,7 @@ const maleVoicePattern=/male|man|guy|david|mark|daniel|alex|ravi|prabhat|madhur|
 let lastCelebrationVoice="";
 function speakCelebration(){
  const count=Number(save.celebrationIndex)||0;
- const milestoneLines=l===25?(w===7?[\"NAZIF! YOU ARE THE GALAXY CHAMPION!\",\"Kya baat hai Nazif! You conquered the whole galaxy!\",\"Legendary victory, Nazif! The universe is cheering!\"]:[\"Boss defeated, Nazif! What a champion!\",\"Zabardast Nazif! You beat the Galaxy Guardian!\",\"Incredible boss victory! You are unstoppable!\"]):[];
+ const milestoneLines=l===25?(w===7?["NAZIF! YOU ARE THE GALAXY CHAMPION!","Kya baat hai Nazif! You conquered the whole galaxy!","Legendary victory, Nazif! The universe is cheering!"]:["Boss defeated, Nazif! What a champion!","Zabardast Nazif! You beat the Galaxy Guardian!","Incredible boss victory! You are unstoppable!"]):[];
  const line=milestoneLines.length?milestoneLines[count%milestoneLines.length]:celebrationLines[(count*73)%celebrationLines.length];
  save.celebrationIndex=count+1;saveNow();$('winmsg').textContent=line;
  if(!sound||!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')return;
