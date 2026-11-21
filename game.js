@@ -29,7 +29,7 @@ function renderLevels(){let g=$('levelGrid');g.innerHTML='';for(let i=1;i<=100;i
 $('playBtn').onclick=()=>start(maxUnlocked);$('levelsBtn').onclick=()=>{activateAudio();show('levels')};$('levelsBack').onclick=()=>show('home');$('backBtn').onclick=()=>{clearInterval(tick);show('home')};
 $('shuffleBtn').onclick=()=>{activateAudio();tiles=makeBoard(level);moves=0;$('moves').textContent='0';draw();playTone(300,.12)};
 $('restartBtn').onclick=()=>start(level);
-$('hintBtn').onclick=()=>{activateAudio();let e=tiles.indexOf(0),n=sizeFor(level),opts=[];for(let i=0;i<tiles.length;i++)if(tiles[i]&&neighbors(i,e,n))opts.push(i);let i=opts[Math.floor(Math.random()*opts.length)];draw(i);playTone(700,.12);setTimeout(()=>{if(!solved)draw()},1000)};
+$('hintBtn').onclick=()=>{activateAudio();let e=tiles.indexOf(0),n=sizeFor(level),opts=[];const dist=(v,pos)=>{let goal=v-1;return Math.abs(Math.floor(pos/n)-Math.floor(goal/n))+Math.abs(pos%n-goal%n)};for(let i=0;i<tiles.length;i++)if(tiles[i]&&neighbors(i,e,n))opts.push(i);opts.sort((a,b)=>dist(tiles[a],e)-dist(tiles[b],e));let best=opts.filter(i=>dist(tiles[i],e)===dist(tiles[opts[0]],e));let i=best[Math.floor(Math.random()*best.length)];draw(i);playTone(700,.12);setTimeout(()=>{if(!solved)draw()},1400)};
 $('nextBtn').onclick=()=>{if(level>=100){$('winModal').classList.remove('show');show('home')}else start(level+1)};
 $('winHome').onclick=()=>{$('winModal').classList.remove('show');show('home')};
 $('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').innerHTML=sound?'♫ <span>ON</span>':'♫ <span>OFF</span>';if(sound){activateAudio();playTone(660,.1)}else stopMusic()};
