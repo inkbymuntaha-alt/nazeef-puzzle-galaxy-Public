@@ -1,9 +1,10 @@
 {
   "name": "nazeef-puzzle-galaxy",
-  "version": "1.0.0",
+  "version": "6.1.0",
   "private": true,
   "scripts": {
-    "build": "mkdir -p www && cp index.html style.css game.js manifest.webmanifest www/"
+    "build": "mkdir -p www && cp index.html style.css game.js manifest.webmanifest www/",
+    "test": "node scripts/validate.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",
