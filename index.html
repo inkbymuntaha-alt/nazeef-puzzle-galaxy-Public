@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b25"><meta name="description" content="Nazif Puzzle Galaxy 8.0 — Celebration audio upgrade with 576 phrase combinations, milestone voice lines and layered victory effects.">
-<title>Nazif Puzzle Galaxy 8.0</title>
+<meta name="theme-color" content="#080b25"><meta name="description" content="Nazif Puzzle Galaxy 9.0 — Enhanced 3D worlds and cinematic scenery with 576 phrase combinations, milestone voice lines and layered victory effects.">
+<title>Nazif Puzzle Galaxy 9.0</title>
 <style>
 :root{color-scheme:dark;--cyan:#7af3ff;--gold:#ffdc70;--pink:#ff86d0;--panel:#111b43}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,"Trebuchet MS",sans-serif;color:#f7f8ff;background:#070a20}
@@ -42,7 +42,7 @@ h2{font-size:16px;margin:0 0 7px}.sub{font-size:12px;line-height:1.45;color:#c5d
 <section id="stage"><canvas id="view"></canvas><div class="fx" id="fx"></div><div id="intro"><div class="intro-kicker">GALAXY MISSION</div><div id="intro-title">MOON MEADOW</div><div id="intro-sub">Your adventure begins now</div></div><div id="toast"></div><div id="win"><div class="winbox"><div class="big">🏆✨</div><h2>GALAXY MASTER!</h2><p id="winmsg">You solved the cosmic puzzle!</p><button class="btn primary" id="next">NEXT ADVENTURE 🚀</button></div></div></section>
 <nav id="controls" aria-label="Game controls"><button id="jump" aria-label="Jump">⬆</button><div id="joystick" aria-label="Movement joystick"><div id="stick-knob"></div></div></nav>
 <aside id="side">
-<section class="panel"><div class="topline"><div class="brand"><div class="logo">🚀</div><div><h1>NAZIF <span>PUZZLE GALAXY</span></h1><div class="tag">ULTRA REAL ADVENTURE · 8.0</div></div></div><button class="btn" id="sound">🔊</button></div><div class="stats"><div class="stat">⭐ STARS<b id="stars">0</b></div><div class="stat">🏆 LEVELS<b id="done">0/200</b></div><div class="stat">💎 CRYSTALS<b id="gems">0</b></div><div class="stat">🪙 COINS<b id="coins">0</b></div></div></section>
+<section class="panel"><div class="topline"><div class="brand"><div class="logo">🚀</div><div><h1>NAZIF <span>PUZZLE GALAXY</span></h1><div class="tag">ULTRA 3D ADVENTURE · 9.0</div></div></div><button class="btn" id="sound">🔊</button></div><div class="stats"><div class="stat">⭐ STARS<b id="stars">0</b></div><div class="stat">🏆 LEVELS<b id="done">0/200</b></div><div class="stat">💎 CRYSTALS<b id="gems">0</b></div><div class="stat">🪙 COINS<b id="coins">0</b></div></div></section>
 <section class="panel"><h2 id="worldname">🌙 Moon Meadow</h2><p class="sub" id="worlddesc">Explore a glowing moon garden. Collect the crystals and reach the portal.</p><div class="worldrow" id="worlds"></div></section>
 <section class="panel"><div class="topline"><h2 id="levelname">Level 1</h2><span class="pill" id="progress">0 / 3 ⭐</span></div><div id="goal"><div class="goalicon">🗝️</div><div class="goaltext"><b>Mission:</b> Find 3 crystals, collect the golden key, rescue your space buddy, then unlock the portal. Final levels have a Galaxy Guardian!</div></div><div id="levels"></div></section>
 <section class="panel"><div class="actions"><button class="btn" id="hint">💡 Hint</button><button class="btn" id="restart">↻ Restart</button><button class="btn" id="map">🌌 Level map</button></div><div style="height:7px"></div><button class="btn primary" id="suitshop">🧑‍🚀 UPGRADE SUIT · 50 COINS</button><div style="height:9px"></div><div class="dpad"><button class="up" data-dir="up">↑</button><button class="left" data-dir="left">←</button><button class="down" data-dir="down">↓</button><button class="right" data-dir="right">→</button></div></section>
@@ -91,6 +91,49 @@ function makeAstronaut(){
  }
  root.add(rig);return root;
 }
+function addWorldScenery(){
+ // A large ringed planet gives every maze a dramatic, layered skyline.
+ const planetColors=['#8b9cff','#ff8acb','#69eaff','#8bf0a5','#ffc86d','#ff9b7a','#9edcff','#d9a4ff'];
+ const planetColor=planetColors[w%planetColors.length];
+ const planet=new THREE.Mesh(new THREE.SphereGeometry(1.28,40,32),new THREE.MeshStandardMaterial({color:planetColor,roughness:.48,metalness:.22,emissive:planetColor,emissiveIntensity:.16}));
+ planet.position.set(-N*.48,3.65,-N*.48);planet.castShadow=true;board.add(planet);
+ const planetRing=new THREE.Mesh(new THREE.TorusGeometry(1.78,.075,12,72),new THREE.MeshStandardMaterial({color:'#e6eaff',metalness:.72,roughness:.2,emissive:planetColor,emissiveIntensity:.45}));
+ planetRing.position.copy(planet.position);planetRing.rotation.set(.92,.18,-.25);planetRing.scale.set(1,.72,1);board.add(planetRing);sparkles.push(planetRing);
+ // Distant moons and tiny orbiting bodies add depth without heavy textures.
+ for(let i=0;i<5;i++){
+  const a=i*Math.PI*2/5+.4,rad=2.45+(i%2)*.5;
+  const moon=new THREE.Mesh(new THREE.SphereGeometry(.18+(i%3)*.055,16,12),new THREE.MeshStandardMaterial({color:['#d7e8ff','#ffdca0','#b9a7ff'][i%3],roughness:.8,metalness:.12}));
+  moon.position.set(planet.position.x+Math.cos(a)*rad,planet.position.y+Math.sin(a)*.62,planet.position.z+Math.sin(a)*rad);board.add(moon);
+ }
+ // Four monumental portal pylons frame the maze like a themed adventure arena.
+ const edge=N/2+.52, pylonColors=[planetColor,'#72f3ff','#ffcf72','#d99bff'];
+ for(let i=0;i<4;i++){
+  const x=i<2?(i===0?-edge:edge):(i===2?-edge:edge);
+  const z=i<2?(i===0?-edge:edge):(i===2?edge:-edge);
+  const c=pylonColors[(i+w)%pylonColors.length],glowMat=new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:1.25,metalness:.5,roughness:.22});
+  const base=addBox(board,x,-.02,z,.62,.28,.62,material('#263d70',.35,.45));
+  const shaft=addBox(board,x,.72,z,.28,1.42,.28,material('#9db8e8',.3,.55));
+  const cap=addBox(board,x,1.5,z,.58,.18,.58,glowMat);
+  const orb=new THREE.Mesh(new THREE.OctahedronGeometry(.22,1),glowMat);orb.position.set(x,1.83,z);orb.rotation.y=i*.7;board.add(orb);sparkles.push(orb);
+  const halo=new THREE.Mesh(new THREE.TorusGeometry(.39,.035,8,28),glowMat);halo.position.set(x,1.85,z);halo.rotation.x=Math.PI/2;board.add(halo);sparkles.push(halo);
+ }
+ // Floating crystal clusters and themed alien flora decorate the outer rim.
+ const floraPalette=[planetColor,'#7af3ff','#ff86d0','#ffdc70','#9dffbd'];
+ for(let i=0;i<10;i++){
+  const side=i%4,along=(i/9-.5)*(N-1),x=side===0?-edge-.48:side===1?edge+.48:along,z=side===2?-edge-.48:side===3?edge+.48:along;
+  const h=.55+(i%4)*.22,c=floraPalette[(i+w)%floraPalette.length];
+  const stem=new THREE.Mesh(new THREE.CylinderGeometry(.045,.11,h,8),material('#38547d',.55,.18));stem.position.set(x,h/2-.03,z);stem.castShadow=true;board.add(stem);
+  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.22+(i%3)*.055,1),new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.75,roughness:.22,metalness:.28}));crown.position.set(x,h+.12,z);crown.castShadow=true;board.add(crown);sparkles.push(crown);
+  const mote=new THREE.PointLight(c,.65,2.5);mote.position.set(x,h+.2,z);board.add(mote);
+ }
+ // Decorative energy lanes beneath the playable tiles.
+ for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+  if(!grid[r*N+c])continue;
+  const p=cellPos(r*N+c);
+  const inset=new THREE.Mesh(new THREE.BoxGeometry(.64,.012,.035),new THREE.MeshStandardMaterial({color:planetColor,emissive:planetColor,emissiveIntensity:.48,transparent:true,opacity:.7}));
+  inset.position.set(p.x,-.012,p.z+.34);board.add(inset);
+ }
+}
 function addWorldDecor(){
  const platformEdge=N/2+.8;for(let i=0;i<3;i++){let plat=addBox(board,(i-1)*1.55,.35,-platformEdge-.7,.95,.16,.72,material(["#5deaff","#ff8bd2","#ffd66e"][i],.3,.45));platforms.push(plat)}
 
@@ -114,7 +157,7 @@ function buildWorld(){let color=worlds[w][3];scene.background=new THREE.Color(w=
  let rim=new THREE.Mesh(new THREE.TorusGeometry((N+.35)*.69,.075,8,80),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.45,metalness:.5,roughness:.3}));rim.rotation.x=Math.PI/2;rim.position.y=-.12;rim.scale.set(1,1,1);board.add(rim);
  for(let r=0;r<N;r++)for(let c=0;c<N;c++){let i=r*N+c,p=cellPos(i);if(grid[i]){let tile=addBox(board,p.x,-.04,p.z,.94,.22,.94,material(i===goal?'#176e75':got.includes(i)?'#315b7b':'#38548f',.48,.22));tile.userData.index=i;objects.push(tile);let top=addBox(board,p.x,.075,p.z,.86,.035,.86,material(i===goal?'#36a9a0':got.includes(i)?'#467da0':'#4969a8',.38,.18));if(i===goal){addOrb(p.x,.45,p.z,.25,'#68ffd2',1.5);let ring=new THREE.Mesh(new THREE.TorusGeometry(.42,.055,8,32),new THREE.MeshStandardMaterial({color:'#8affd6',emissive:'#39ffc1',emissiveIntensity:1.5}));ring.rotation.x=Math.PI/2;ring.position.set(p.x,.24,p.z);board.add(ring);sparkles.push(ring)}}else{let wall=addBox(board,p.x,.18,p.z,.96,.62,.96,material('#121b3e',.55,.2));wall.position.y=.03;let cap=addBox(board,p.x,.35,p.z,.88,.07,.88,material('#263b70',.38,.3));}}
  if(keyCell>=0&&!gotKey){let p=cellPos(keyCell);keyMesh=new THREE.Group();let bow=new THREE.Mesh(new THREE.TorusGeometry(.13,.045,8,20),new THREE.MeshStandardMaterial({color:"#ffe27a",emissive:"#ffb52d",emissiveIntensity:1.5,metalness:.5}));bow.position.y=.2;keyMesh.add(bow);let shaft=addBox(keyMesh,0,0,0,.055,.36,.055,material("#ffe27a",.2,.7));shaft.rotation.z=Math.PI/2;keyMesh.position.set(p.x,.48,p.z);board.add(keyMesh);sparkles.push(keyMesh)}if(rescueCell>=0&&!rescuedBuddy){let p=cellPos(rescueCell);buddyMesh=new THREE.Group();let body=new THREE.Mesh(new THREE.SphereGeometry(.22,18,14),new THREE.MeshStandardMaterial({color:"#ff8bd5",emissive:"#ff4bb8",emissiveIntensity:.55}));body.position.y=.2;buddyMesh.add(body);let eyeMat=material("#ffffff",.2);[-.08,.08].forEach(x=>{let eye=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),eyeMat);eye.position.set(x,.25,.18);buddyMesh.add(eye)});buddyMesh.position.set(p.x,.42,p.z);board.add(buddyMesh);sparkles.push(buddyMesh)}if(l===25){let p=cellPos(goal);bossMesh=new THREE.Group();let core=new THREE.Mesh(new THREE.SphereGeometry(.36,28,22),new THREE.MeshStandardMaterial({color:"#ff4e78",roughness:.22,metalness:.32,emissive:"#b50048",emissiveIntensity:1.5}));core.scale.set(1,1.22,.9);core.castShadow=true;bossMesh.add(core);let eyeMat=new THREE.MeshStandardMaterial({color:"#fff4bd",emissive:"#ffe27a",emissiveIntensity:2});[-.13,.13].forEach(x=>{let eye=new THREE.Mesh(new THREE.SphereGeometry(.065,14,10),eyeMat);eye.position.set(x,.09,.29);bossMesh.add(eye)});let hornMat=new THREE.MeshStandardMaterial({color:"#ffd66e",metalness:.48,roughness:.24,emissive:"#ff8c42",emissiveIntensity:.5});[-1,1].forEach(side=>{let horn=new THREE.Mesh(new THREE.ConeGeometry(.105,.34,10),hornMat);horn.position.set(side*.25,.36,0);horn.rotation.z=side*-.48;horn.castShadow=true;bossMesh.add(horn)});let aura=new THREE.Mesh(new THREE.TorusGeometry(.55,.045,10,48),new THREE.MeshStandardMaterial({color:"#ff8bd5",emissive:"#ff2d83",emissiveIntensity:1.8,metalness:.4}));aura.rotation.x=Math.PI/2;aura.position.y=-.22;bossMesh.add(aura);bossMesh.position.set(p.x,.8,p.z);board.add(bossMesh);toast("GALAXY GUARDIAN AWAITS! 👾") }starCells.forEach(i=>{if(got.includes(i))return;let p=cellPos(i);let star=new THREE.Mesh(new THREE.OctahedronGeometry(.29,1),new THREE.MeshStandardMaterial({color:'#ffe27a',metalness:.45,roughness:.18,emissive:'#ffad24',emissiveIntensity:1.25}));star.position.set(p.x,.55,p.z);star.castShadow=true;board.add(star);starMeshes[i]=star;sparkles.push(star)});
- addWorldDecor();hazardCells.forEach(i=>{let p=cellPos(i),ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.075,8,24),new THREE.MeshStandardMaterial({color:"#ff5c86",emissive:"#ff164f",emissiveIntensity:1.2,transparent:true,opacity:.9}));ring.rotation.x=Math.PI/2;ring.position.set(p.x,.2,p.z);board.add(ring);hazardMeshes.push(ring)});let p=cellPos(player);hero=makeAstronaut();hero.position.set(p.x,.47,p.z);board.add(hero);enemies.forEach((e,idx)=>{let g=new THREE.Group(),body=new THREE.Mesh(new THREE.SphereGeometry(.23,18,14),new THREE.MeshStandardMaterial({color:idx?"#9b82ff":"#ff6d8d",roughness:.35,emissive:idx?"#4b27b5":"#a51e54",emissiveIntensity:.6}));body.position.y=.3;g.add(body);let eyeMat=new THREE.MeshStandardMaterial({color:"#ffffff",emissive:"#ffffff",emissiveIntensity:.5});[-.085,.085].forEach(x=>{let eye=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8),eyeMat);eye.position.set(x,.35,.19);g.add(eye)});let antenna=new THREE.Mesh(new THREE.ConeGeometry(.055,.17,8),material("#ffe27a",.25,.3));antenna.position.y=.56;g.add(antenna);let ep=cellPos(path[e.idx]);g.position.set(ep.x,.18,ep.z);e.mesh=g;board.add(g)});
+ addWorldDecor();addWorldScenery();hazardCells.forEach(i=>{let p=cellPos(i),ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.075,8,24),new THREE.MeshStandardMaterial({color:"#ff5c86",emissive:"#ff164f",emissiveIntensity:1.2,transparent:true,opacity:.9}));ring.rotation.x=Math.PI/2;ring.position.set(p.x,.2,p.z);board.add(ring);hazardMeshes.push(ring)});let p=cellPos(player);hero=makeAstronaut();hero.position.set(p.x,.47,p.z);board.add(hero);enemies.forEach((e,idx)=>{let g=new THREE.Group(),body=new THREE.Mesh(new THREE.SphereGeometry(.23,18,14),new THREE.MeshStandardMaterial({color:idx?"#9b82ff":"#ff6d8d",roughness:.35,emissive:idx?"#4b27b5":"#a51e54",emissiveIntensity:.6}));body.position.y=.3;g.add(body);let eyeMat=new THREE.MeshStandardMaterial({color:"#ffffff",emissive:"#ffffff",emissiveIntensity:.5});[-.085,.085].forEach(x=>{let eye=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8),eyeMat);eye.position.set(x,.35,.19);g.add(eye)});let antenna=new THREE.Mesh(new THREE.ConeGeometry(.055,.17,8),material("#ffe27a",.25,.3));antenna.position.y=.56;g.add(antenna);let ep=cellPos(path[e.idx]);g.position.set(ep.x,.18,ep.z);e.mesh=g;board.add(g)});
  for(let i=0;i<22;i++){let a=addOrb((randFloat()- .5)*N,2+Math.random()*5,(randFloat()-.5)*N,.025,'#a9eaff',.7);sparkles.push(a)}
  let span=N*.72,zoom=camera.aspect<.9?1.75:1;camera.position.set(span*zoom,span*1.23*zoom,span*1.28*zoom);camera.lookAt(0,0,0);camera.updateProjectionMatrix()}
 function randFloat(){return Math.random()}
