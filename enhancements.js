@@ -25,7 +25,7 @@ board.addEventListener('pointerup',e=>{
    if(Math.abs(Math.floor(from/n)-Math.floor(empty/n))===0&&Math.sign(dx)===Math.sign(empty-from))target=from;
  }else if(Math.abs(from% n-empty% n)===0&&Math.sign(dy)===Math.sign(empty-from)*Math.sign(n))target=from;
  if(target>=0&&Math.abs(target-empty)===1||target>=0&&Math.abs(target-empty)===n)tapAt(target);
-},{passive:true});
+},{passive:false});
 document.addEventListener('keydown',e=>{
  if(!active()||e.altKey||e.ctrlKey||e.metaKey)return;
  const map={ArrowLeft:-1,ArrowRight:1,ArrowUp:-1,ArrowDown:1};
