@@ -1,19 +1,26 @@
-# Nazeef Puzzle Galaxy
+# Nazif Puzzle Galaxy
 
-A colourful, mobile-first sliding puzzle game with 100 progressively harder levels.
+A portrait-first 3D maze adventure for mobile browsers, built with Three.js.
 
-## Play locally
-Open `index.html` in a modern browser, or serve this folder with any static web server.
+## Play
 
-## Android APK
-The GitHub Actions workflow builds a debug APK. Open **Actions → Build Android APK → Run workflow**. When complete, download the `nazeef-puzzle-galaxy-debug-apk` artifact.
+Open the GitHub Pages site: https://inkbymuntaha-alt.github.io/nazeef-puzzle-galaxy-Public/
 
-## Features
-- 100 levels with 3×3 through 6×6 boards
-- Touch-friendly sliding tiles, shuffle, restart and hint
-- Move counter, timer, stars and locally saved progress
-- Synthesized sound effects and optional ambient melody
-- Victory celebration with confetti
-- Responsive layout for phones and tablets
+## Game
 
-All gameplay logic and puzzle assets are generated locally; no gameplay network connection is required.
+- 8 themed worlds and 200 levels.
+- Collect three crystals, find the golden key, rescue your space buddy and reach the portal.
+- Level 25 in each world includes a Galaxy Guardian.
+- Moving alien patrols, energy traps, jetpack jumps, suit colours and level celebrations.
+- Touch joystick and jump controls below the game; keyboard arrows or WASD on desktop. Space or W jumps.
+- Progress is saved locally in the browser when storage is available.
+
+## Development
+
+- `npm test` checks the embedded game module syntax and required page elements.
+- `npm run build` prepares the static web assets in `www/` for Capacitor.
+- The Android workflow is separate. Browser gameplay is the first release target; no APK is required to test the game.
+
+## Notes
+
+Three.js is loaded from jsDelivr, and speech uses the voices available in the player's browser or device. Voice quality and availability depend on that device.
